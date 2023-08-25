@@ -98,69 +98,85 @@ export const usersController = {
     }
 
   },
-  resetPassword:async(req:Request, res:Response)=>{
-    try{
+  resetPassword: async (req: Request, res: Response) => {
+    try {
       const { user_id } = req.params
       console.log(user_id)
-      const {password} = req.body
-      await userServices.resetPassword(user_id,password)
+      const { password } = req.body
+      await userServices.resetPassword(user_id, password)
       return res.json({
-        message:"bạn đã đổi mật khẩu thành công"
+        message: "bạn đã đổi mật khẩu thành công"
       })
     }
 
-    catch(error) {
+    catch (error) {
       console.log(error)
     }
   },
-  getMe:async(req: Request, res: Response)=>{
-    try{
-      const {user_id}= req.access_token as TypePayloadRequest
-      const result =await userServices.getMe(user_id)
+  getMe: async (req: Request, res: Response) => {
+    try {
+      const { user_id } = req.access_token as TypePayloadRequest
+      const result = await userServices.getMe(user_id)
       return res.json({
-        message:"lấy thông tin thành công",
-        data:result
+        message: "lấy thông tin thành công",
+        data: result
       })
-    }catch(error) {
+    } catch (error) {
       console.log(error)
     }
   },
-  
-  getProfile:async(req:Request<ParamsDictionary, any,{id:string}>, res:Response)=>{
-   try{
-    const {id} = req.params
-    const result = await userServices.getProfile(id)
-    return res.json({
-      message:"lấy thông tin bạn bè thành công",
-      data:result
-    })
-  
-   }
-   catch(error){
-    console.log(error)
-   }
-  },
-  follower:async(req:Request, res:Response)=>{
-    try{
-      const {id}=req.params;
-      const {user_id}= req.access_token as TypePayloadRequest
-      const result = await userServices.follower({id,user_id})
+
+  getProfile: async (req: Request<ParamsDictionary, any, { id: string }>, res: Response) => {
+    try {
+      const { id } = req.params
+      const result = await userServices.getProfile(id)
       return res.json({
-        message:"bạn đã follow người khác thành công",
-        data:result
+        message: "lấy thông tin bạn bè thành công",
+        data: result
       })
+
+    }
+    catch (error) {
+      console.log(error)
+    }
+  },
+  follower: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { user_id } = req.access_token as TypePayloadRequest
+      const result = await userServices.follower({ id, user_id })
+      return res.json({
+        message: "bạn đã follow người khác thành công",
+        data: result
+      })
+    } catch (error) {
+      console.log(error)
+    }
+
+  },
+  changePassword: async (req: Request, res: Response) => {
+    try {
+      const { user_id } = req.access_token as TypePayloadRequest
+      const { newPassword } = req.body
+      await userServices.changePassword(user_id, newPassword)
+      return res.json({
+        message: "thay đổi mật khẩu thành công"
+      })
+    } catch (error) {
+      console.log(error)
+    }
+
+  },
+  changeAccount:async(req:Request, res:Response) => {
+    try{
+        const {user_id}= req.access_token as TypePayloadRequest
+        const result = await userServices.changeAccount(user_id,req.body)
+        return res.json({
+          message:"thay đổi tài khoản thành công",
+          data:result
+        })
     }catch(error){
       console.log(error)
     }
-
-  },
-  changePassword:async(req:Request, res:Response)=>{
-    try{
-      const {user_id}= req.access_token as TypePayloadRequest
-      const result = await  userServices.changePassword(user_id)
-    }catch(error){
-      console.log(error)
-    }
-
   }
 }

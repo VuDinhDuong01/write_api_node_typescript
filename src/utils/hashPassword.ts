@@ -1,10 +1,8 @@
-import bcrypt from "bcrypt";
-const SALT = 10;
-const salt = bcrypt.genSaltSync(SALT);
-export const hashPassword = (password: string) => {
-  return bcrypt.hashSync(password, salt);
-}
+import crypto from 'crypto'
 
-export const comparePassword = (password: string, hash:string) => {
-  return bcrypt.compareSync(password,hash)
+export const hashPassword = (password: string) => {
+  const salt = 'securitypassword'
+  const hash = crypto.createHash('sha256');
+  hash.update(password + salt);
+  return hash.digest('hex');
 }

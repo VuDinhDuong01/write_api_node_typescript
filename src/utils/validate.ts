@@ -2,16 +2,17 @@ import { checkSchema } from 'express-validator'
 import { usersController } from '~/controllers/users.controllers'
 import { validate } from '~/middlewares/validation.middlewares'
 import { verifyJWT } from './jwt'
-import { comparePassword } from './hashPassword'
+import { hashPassword } from './hashPassword'
 import { ErrorStatus } from '~/models/error'
 import { Request } from 'express'
 import { configENV } from '~/contants/configENV'
 import { ModelUsers } from '~/models/model/users.model'
+import mongoose from 'mongoose'
 
 export const validationRegister = validate(checkSchema({
 
   name: {
-    notEmpty: false,
+    notEmpty: true,
     isLength: {
       options: {
         min: 1,
@@ -98,8 +99,8 @@ export const validationLogin = validate(checkSchema({
         if (!result) {
           throw new ErrorStatus({ message: "email bạn đăng nhập sai", status: 403 })
         } else {
-          const password = result.password
-          const compare = comparePassword(req.body.password, password)
+
+          const compare = hashPassword(req.body.password)
           if (!compare) {
             throw new ErrorStatus({ message: "mật khẩu bạn nhập sai", status: 403 })
           } else {
@@ -302,8 +303,7 @@ export const validationResetPassword = validate(checkSchema({
 }, ['body']))
 
 export const validationChangePassowrd = validate(checkSchema({
-  password: {
-    notEmpty: true,
+  passwordOld: {
     trim: true,
     custom: {
       options: async (value, { req }) => {
@@ -311,7 +311,9 @@ export const validationChangePassowrd = validate(checkSchema({
           throw new Error("trường này bắt buộc phải nhập")
         }
         const { user_id } = req.access_token
-        const checkPassword = await ModelUsers.findOne({ password:comparePassword(value,d), _id: user_id })
+        console.log(user_id)
+        const checkPassword = await ModelUsers.findOne({ password: hashPassword(req.body.passwordOld), _id: new mongoose.Types.ObjectId(user_id) })
+
         if (!checkPassword) {
           throw new ErrorStatus({
             message: "mật khẩu bạn nhập chưa đúng",
@@ -324,7 +326,7 @@ export const validationChangePassowrd = validate(checkSchema({
     }
   },
   newPassword: {
-    notEmpty: true,
+
     trim: true,
     isLength: {
       options: {
@@ -343,17 +345,61 @@ export const validationChangePassowrd = validate(checkSchema({
 
   },
   newConfirmPassword: {
-    notEmpty: true,
+
     trim: true,
+    isStrongPassword: {
+      options: {
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+      }
+    },
     custom: {
       options: (value, { req }) => {
         if (!value) {
           throw new Error("Trường này bắt buộc phải nhập")
         }
-        if (value !== req.body.newPassword) {
-          throw new Error("bạn nhập lại mật khẩu chưa đúng")
+        else {
+          if (value !== req.body.newPassword) {
+            throw new Error("bạn nhập lại mật khẩu chưa đúng")
+          }
+          return true
         }
+
       }
     }
   }
-}))
+}, ['body']))
+
+export const validationAccount = validate(checkSchema({
+  name: {
+    notEmpty: true,
+    isLength: {
+      options: {
+        min: 1,
+        max: 100
+      }
+    },
+    trim: true,
+    errorMessage: "không được để trống"
+  },
+  date_of_birth: {
+    notEmpty: true,
+    isISO8601: {
+      options: {
+        strict: true,
+        strictSeparator: true
+      }
+    }
+  },
+  website: {
+    notEmpty: true,
+  },
+  avatar: {
+    notEmpty: true,
+  },
+  bio: {
+    notEmpty: true,
+  },
+}, ['body']))

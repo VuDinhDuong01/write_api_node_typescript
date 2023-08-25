@@ -162,10 +162,10 @@ export const userServices = {
     })
     return result
   },
-  changePassword: async (user_id: string) => {
+  changePassword: async (user_id: string, newPassword: string) => {
     const result = await ModelUsers.findByIdAndUpdate({ _id: user_id }, {
       $set: {
-
+        password: hashPassword(newPassword)
       },
       $currentDate: {
         updated_at: true
@@ -173,6 +173,24 @@ export const userServices = {
     }, {
       new: true
     })
+    return result
+  },
+  changeAccount: async (user_id: string, body: Pick<UserType, 'name' | 'website' | 'bio' | 'avatar' | 'date_of_birth'>) => {
+    const result = await ModelUsers.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(user_id) }, {
+      $set: {
+        website: body.website,
+        bio: body.bio,
+        avatar: body.avatar,
+        date_of_birth: body.date_of_birth,
+        name: body.name,
+        username: body.name
+      },
+      $currentDate: {
+        updated_at: true
+      }
+    },{
+      new:true
+    })
+    return result 
   }
-
 }
