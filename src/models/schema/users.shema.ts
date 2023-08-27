@@ -22,9 +22,8 @@ export const UserSchema: Schema<UserType> = new mongoose.Schema({
   avatar: { type: String, default: '' },
   updated_at: { type: Date, default: date },
   date_of_birth: { type: Date, default: date },
-  confirmPassword: { type: String, default: '' }
 },
   {
     collection: 'users'
   }
-  );
+);

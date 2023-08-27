@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Response, Request } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-// import { modelRefreshToken } from '~/models/model/refreshToken.model'
+
 
 import { ModelUsers } from '~/models/model/users.model'
 import { userServices } from '~/services/users.services'
@@ -49,9 +49,10 @@ export const usersController = {
     }
   },
   refresh_token: async (req: Request, res: Response) => {
-    const { user_id } = req.refresh_token as TypePayloadRequest
-    const result = await userServices.refresh_token(user_id)
-
+    const { user_id, exp } = req.refresh_token as TypePayloadRequest
+    const {refresh_token}= req.body
+  
+    const result = await userServices.refresh_token(user_id, refresh_token, exp)
     return res.json({
       message: "refresh token successfully",
       result
@@ -126,7 +127,7 @@ export const usersController = {
     }
   },
 
-  getProfile: async (req: Request<ParamsDictionary, any, { id: string }>, res: Response) => {
+  getProfile: async (req: Request, res: Response) => {
     try {
       const { id } = req.params
       const result = await userServices.getProfile(id)
@@ -134,7 +135,6 @@ export const usersController = {
         message: "lấy thông tin bạn bè thành công",
         data: result
       })
-
     }
     catch (error) {
       console.log(error)
@@ -167,16 +167,13 @@ export const usersController = {
     }
 
   },
-  changeAccount:async(req:Request, res:Response) => {
-    try{
+  changeAccount:async(req:Request, res:Response) => {    
         const {user_id}= req.access_token as TypePayloadRequest
         const result = await userServices.changeAccount(user_id,req.body)
         return res.json({
           message:"thay đổi tài khoản thành công",
           data:result
         })
-    }catch(error){
-      console.log(error)
-    }
+    
   }
 }

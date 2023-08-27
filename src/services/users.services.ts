@@ -8,16 +8,19 @@ import { modelRefreshToken } from '~/models/model/refreshToken.model'
 import { VerifyType } from '~/models/schema/users.shema'
 import { modelFollower } from '~/models/model/follower.model'
 
-
 type RegisterType = Pick<UserType, 'email' | 'password' | 'name' | 'date_of_birth'>
 export const userServices = {
-
-  accessToken: async (user_id: string, date: string) => {
-    return await singJWT({ token: { user_id: user_id }, privateKey: configENV.ACCESS_TOKEN, option: { expiresIn: date } })
+  
+  accessToken: (user_id: string, date: string) => {
+    return singJWT({ token: { user_id: user_id }, privateKey: configENV.ACCESS_TOKEN, option: { expiresIn: date } })
   },
 
-  refreshToken: async (id: string) => {
-    return singJWT({ token: { user_id: id }, privateKey: configENV.REFRESH_TOKEN, option: { expiresIn: '7d' } })
+  refreshToken: (id: string, exp?: number) => {
+    if (exp) {
+      return singJWT({ token: { user_id: id, exp: exp }, privateKey: configENV.REFRESH_TOKEN })
+    } else {
+      return singJWT({ token: { user_id: id }, privateKey: configENV.REFRESH_TOKEN, option: { expiresIn: '7d' } })
+    }
   },
 
   register: async (payload: RegisterType) => {
@@ -35,7 +38,7 @@ export const userServices = {
       userServices.accessToken(result._id.toString(), '2d'),
       userServices.refreshToken(result._id.toString()),
       ModelUsers.findById({ _id: result._id }).select(
-        '-verify -email_token_veirify -confirmPassword -fotgot_password_verify'
+        '-verify -email_token_verify -confirmPassword -fotgot_password_verify'
       )
     ])
 
@@ -49,10 +52,9 @@ export const userServices = {
       user
     }
   },
-
   login: async (payload: Pick<RegisterType, 'email' | 'password'>) => {
     const result = await ModelUsers.findOne({ email: payload.email }).select(
-      '-verify -email_token_veirify -confirmPassword -fotgot_password_verify'
+      '-verify -email_token_verify -confirmPassword -fotgot_password_verify'
     ) as UserType
 
     const [access_token, refresh_token] = await Promise.all([
@@ -76,10 +78,13 @@ export const userServices = {
       messsage: "logout successfully"
     }
   },
-  refresh_token: async (user_id: string) => {
-    const [access_token, refresh_token,] = await Promise.all([userServices.accessToken(user_id, '2d'), userServices.refreshToken(user_id), modelRefreshToken.deleteOne({ token: user_id })]);
+  refresh_token: async (user_id: string, refresh_token: string, exp: number) => {
+    const [access_token, refreshToken,] = await Promise.all([
+      userServices.accessToken(user_id, '2d'),
+      userServices.refreshToken(user_id, exp),
+      modelRefreshToken.deleteOne({ refresh_token })]);
     await modelRefreshToken.create({ token: user_id, refresh_token })
-    return { access_token, refresh_token }
+    return { access_token, refresh_token: refreshToken }
   },
   verify_email: async (user_id: string) => {
 
@@ -147,11 +152,11 @@ export const userServices = {
     return result
   },
   getMe: async (user_id: string) => {
-    const result = await ModelUsers.findOne({ _id: new mongoose.Types.ObjectId(user_id) })
+    const result = await ModelUsers.findOne({ _id: new mongoose.Types.ObjectId(user_id) }).select('-verify -email_token_verify -fotgot_password_verify -confirmPassword')
     return result
   },
   getProfile: async (id: string) => {
-    const result = await ModelUsers.findOne({ _id: new mongoose.Types.ObjectId(id) })
+    const result = await ModelUsers.findById({ _id: new mongoose.Types.ObjectId(id) }).select('-verify -email_token_verify -fotgot_password_verify -password')
     return result
   },
 
@@ -175,6 +180,7 @@ export const userServices = {
     })
     return result
   },
+
   changeAccount: async (user_id: string, body: Pick<UserType, 'name' | 'website' | 'bio' | 'avatar' | 'date_of_birth'>) => {
     const result = await ModelUsers.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(user_id) }, {
       $set: {
@@ -188,9 +194,9 @@ export const userServices = {
       $currentDate: {
         updated_at: true
       }
-    },{
-      new:true
-    })
-    return result 
+    }, {
+      new: true
+    }).select('-verify -fotgot_password_verify -email_token_verify')
+    return result
   }
 }

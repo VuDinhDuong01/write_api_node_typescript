@@ -9,6 +9,7 @@ import { configENV } from '~/contants/configENV'
 import { ModelUsers } from '~/models/model/users.model'
 import mongoose from 'mongoose'
 
+
 export const validationRegister = validate(checkSchema({
 
   name: {
@@ -23,10 +24,13 @@ export const validationRegister = validate(checkSchema({
     errorMessage: "không được để trống"
   },
   email: {
-    notEmpty: true,
+
     isEmail: true,
     custom: {
       options: async (value, { req }) => {
+        if (!value) {
+          throw new Error("Trường này phải bắt buộc nhập")
+        }
         const result = await usersController.checkExistsEmail(req.body.email)
         if (result) {
           throw new Error('email đã tồn tại ')
@@ -91,15 +95,17 @@ export const validationRegister = validate(checkSchema({
 
 export const validationLogin = validate(checkSchema({
   email: {
-    notEmpty: true,
+
     isEmail: true,
     custom: {
       options: async (value, { req }) => {
+        if (!value) {
+          throw new Error('Trường này phải bắt buộc nhập')
+        }
         const result = await usersController.checkExistsEmail(req.body.email)
         if (!result) {
           throw new ErrorStatus({ message: "email bạn đăng nhập sai", status: 403 })
         } else {
-
           const compare = hashPassword(req.body.password)
           if (!compare) {
             throw new ErrorStatus({ message: "mật khẩu bạn nhập sai", status: 403 })
@@ -149,7 +155,6 @@ export const validitionAccessToken = validate(checkSchema({
             const decoded = await verifyJWT({ token: access_token, privateKey: configENV.ACCESS_TOKEN })
             req.access_token = decoded
           }
-
           catch (error) {
             throw new ErrorStatus({
               message: "access_token đã hết hạn",
@@ -165,7 +170,9 @@ export const validitionAccessToken = validate(checkSchema({
 }, ['headers']))
 
 export const validationRefreshToken = validate(checkSchema({
+
   refresh_token: {
+    trim: true,
     custom: {
       options: async (value, { req }) => {
         if (!value) {
@@ -174,17 +181,22 @@ export const validationRefreshToken = validate(checkSchema({
             status: 401
           })
         }
+        try {
+          const decodedRefreshToken = await verifyJWT({ token: value, privateKey: configENV.REFRESH_TOKEN })
+          req.refresh_token = decodedRefreshToken
+        } catch (error) {
 
-        const decodedRefreshToken = await verifyJWT({ token: value, privateKey: configENV.REFRESH_TOKEN })
-        console.log(decodedRefreshToken)
-        if (!decodedRefreshToken) {
           throw new ErrorStatus({
             message: "refresh_token đã hết hạn",
             status: 401
           })
-
         }
-        req.refresh_token = decodedRefreshToken
+
+
+
+
+
+
       }
     }
   }
@@ -192,7 +204,7 @@ export const validationRefreshToken = validate(checkSchema({
 
 export const validationVerifyEmail = validate(checkSchema({
   email_token_verify: {
-    notEmpty: true,
+
     trim: true,
     custom: {
       options: async (value, { req }) => {
@@ -202,14 +214,16 @@ export const validationVerifyEmail = validate(checkSchema({
             status: 401
           })
         }
-        const decodedVerifyEmail = await verifyJWT({ token: value, privateKey: configENV.ACCESS_TOKEN })
-        if (!decodedVerifyEmail) {
+        try {
+          const decodedVerifyEmail = await verifyJWT({ token: value, privateKey: configENV.ACCESS_TOKEN })
+          req.email_verify_token = decodedVerifyEmail
+        }
+        catch (error) {
           throw new ErrorStatus({
             message: "mã của bạn không đúng",
             status: 401
           })
         }
-        req.email_verify_token = decodedVerifyEmail
         return true
       }
     }
