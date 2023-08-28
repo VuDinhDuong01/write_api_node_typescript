@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import { ModelUsers } from "../model/users.model"
+import { modelRefreshToken } from "../model/refreshToken.model"
 
 
 export const createEmailIndexUser = async () => {
@@ -8,6 +9,13 @@ export const createEmailIndexUser = async () => {
     await ModelUsers.collection.createIndex({ email: 1 }, { unique: true, })
     await ModelUsers.collection.createIndex({ email: 1, password: 1 }, { unique: true })
     await ModelUsers.collection.createIndex({ password: 1 }, { unique: true })
+  }
+}
+
+export const createIndexRefresToken=async()=>{
+  const checkExistsIndex= await modelRefreshToken.collection.indexExists('refresh_token_1')
+  if(!checkExistsIndex){
+    await modelRefreshToken.collection.createIndex({refresh_token:1},{unique:true})
   }
 }
 

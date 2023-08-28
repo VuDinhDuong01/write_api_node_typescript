@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose'
+import mongoose, { Schema ,ObjectId} from 'mongoose'
 
 import { UserType } from '~/types/users.types';
 
@@ -9,6 +9,7 @@ export enum VerifyType {
 
 const date = new Date();
 export const UserSchema: Schema<UserType> = new mongoose.Schema({
+  _id:{type:String},
   name: { type: String, default: '' },
   email: { type: String, default: '' },
   bio: { type: String, default: '' },
