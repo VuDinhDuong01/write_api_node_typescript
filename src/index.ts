@@ -4,6 +4,7 @@ import { config } from 'dotenv'
 import { connectDatabase, createEmailIndexUser, createIndexRefresToken } from './models/connect/connect'
 import { routes } from './routes/index'
 import { handleError } from './middlewares/handleError.middleware'
+import { createFolder } from './utils/file'
 
 config()
 const app = express()
@@ -22,7 +23,7 @@ connectDatabase().then(() => {
 })
 routes(app)
 app.use(handleError)
-
+createFolder()
 app.listen(port, () => {
   console.log(`http://localhost:${port}`)
 })

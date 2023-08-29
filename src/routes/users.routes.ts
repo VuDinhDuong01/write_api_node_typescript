@@ -1,6 +1,16 @@
 import { Router } from "express";
 import { usersController } from "~/controllers/users.controllers";
-import { validationAccount, validationChangePassowrd, validationForgotPassword, validationLogin, validationRefreshToken, validationRegister, validationResetPassword, validationVerifyEmail, validationVerifyForgotPassword, validitionAccessToken } from "~/utils/validate";
+import { validationAccount, 
+  validationChangePassowrd, 
+  validationForgotPassword, 
+  validationLogin, 
+  validationRefreshToken, 
+  validationRegister, 
+  validationResetPassword, 
+  validationVerifyEmail, 
+  validationVerifyForgotPassword, 
+  validitionAccessToken } from "~/utils/validate";
+  
 import { handleAsync } from "~/contants/handleAsync";
 const router = Router()
 

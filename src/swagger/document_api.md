@@ -77,6 +77,10 @@ The base URL for the API is: `http:localhost:5000/api` .Đối với các router
 ```
 
 
+### Login with Google
+
+
+
 ### Login: /auth/login
 **Method:** `POST` body
 **Request**
@@ -327,3 +331,86 @@ The base URL for the API is: `http:localhost:5000/api` .Đối với các router
     }
 }
 ```
+
+### Login with Google
+**Open options email** /api/auth/google
+**Lấy thông tin người dùng sau khi chọn email:** /api/auth/login-succes/:id
+
+**Method:** `GET`
+**Params:**  `:id=?`
+
+### Upload image:  /api/media/upload_image
+**Method:** `POST`
+**Request** body
+-  gửi lên kiểu dataFormat với `image`
+**Rule**
+- maxFile:4
+- allowEmptyFiles: false
+- minFileSize:1024
+- maxFileSize: 1024*4
+**Response**
+
+```json
+[
+    {
+        "type": "image",
+        "image": "http://localhost:5000/Upload/79a922ef5cad1c02a13fbec00.jpg"
+    },
+    {
+        "type": "image",
+        "image": "http://localhost:5000/Upload/79a922ef5cad1c02a13fbec01.jpg"
+    },
+    {
+        "type": "image",
+        "image": "http://localhost:5000/Upload/79a922ef5cad1c02a13fbec02.jpg"
+    },
+    {
+        "type": "image",
+        "image": "http://localhost:5000/Upload/79a922ef5cad1c02a13fbec03.jpg"
+    }
+]
+```
+
+
+### GET FILE : /api/media/get_image/:file
+**Method:** `GET`
+**Request:** `params: tên file`
+```json
+example:
+/api/media/get_image/79a922ef5cad1c02a13fbec00.jpg
+````
+**Response**
+```json
+  trả về hình ảnh muốn get
+``` 
+
+
+### POST VIDEO: /api/media/upload_video
+**Method:** `POST`
+**Request:** body
+- truyền lên kiểu formatData với: `video`
+
+**Rule**
+- allowEmptyFiles: false,
+- minFileSize: 1024 * 1024,
+- maxFiles: 1,
+- maxFileSize: 10 * 1024 * 1024,
+
+**Response**
+```json
+{
+    "type": "video",
+    "video": "http://localhost:5000/Upload/video/79a922ef5cad1c02a13fbec04.mp4"
+}
+```
+
+
+### GET VIDEO: /api/media/get_video/:nameFile
+**Method:** `GET`
+**Request:** `params:nameFile`
+```json
+example: /api/media/get_video/fe7c513cce5e58db8c4689a00.mp4
+```
+
+**Response:** 
+- Trả về video cần lấy ra

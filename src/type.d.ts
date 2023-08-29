@@ -3,7 +3,6 @@ export interface TypePayloadRequest {
   iat: number
   exp: number
 }
-
 declare module 'express' {
 
   interface Request {
