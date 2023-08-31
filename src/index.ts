@@ -12,6 +12,7 @@ const port = process.env.PORT || 3000
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
 app.use(cors({
   origin: 'http://127.0.0.1:5174',
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -21,6 +22,7 @@ connectDatabase().then(() => {
   createEmailIndexUser()
   createIndexRefresToken()
 })
+
 routes(app)
 app.use(handleError)
 createFolder()

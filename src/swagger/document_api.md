@@ -403,8 +403,6 @@ example:
     "video": "http://localhost:5000/Upload/video/79a922ef5cad1c02a13fbec04.mp4"
 }
 ```
-
-
 ### GET VIDEO: /api/media/get_video/:nameFile
 **Method:** `GET`
 **Request:** `params:nameFile`

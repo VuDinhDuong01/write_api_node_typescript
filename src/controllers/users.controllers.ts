@@ -73,14 +73,11 @@ export const usersController = {
 
   },
   verifyForgotPassword: async (req: Request, res: Response) => {
-
     const { user_id } = req.decodeVerifyForgotPassword as TypePayloadRequest
     await userServices.verifyForgotPassword(user_id)
     return res.json({
       message: "bạn đã verify thành công"
     })
-
-
   },
   resetPassword: async (req: Request, res: Response) => {
 
